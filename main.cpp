@@ -33,13 +33,13 @@ const float MAX_FONT_SIZE = 60.0f;
 bool fontSizeChanged = false;
 ImFont* currentFont = nullptr;
 
-int currentWidth = 400;
+int currentWidth = 100;
 int currentHeight = 100;
 
 GLuint VBO, VAO;
 
 // Add these global variables at the top of the file
-int targetWidth = 400;
+int targetWidth = 100;
 int targetHeight = 100;
 bool needsResize = false;
 
@@ -54,6 +54,9 @@ void windowFocusCallback(GLFWwindow* window, int focused)
 {
     g_WindowFocused = focused != 0;
 }
+
+// Add this near the top of the file with other global variables
+bool isFirstFrame = true;
 
 void createRectangleVBO() {
     float vertices[] = {
@@ -219,6 +222,9 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
+    // Modify the window hints before creating the window
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);  // Make the window initially invisible
+
     GLFWwindow* window = glfwCreateWindow(400, 100, "Desktop Tape", NULL, NULL);
     if (!window) {
         glfwTerminate();
@@ -335,7 +341,8 @@ int main(int argc, char* argv[]) {
         ImGui::Begin("Text Input", nullptr, 
             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | 
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | 
-            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground);
+            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground |
+            ImGuiWindowFlags_NoScrollWithMouse); // Add this flag
 
         ImGui::PushFont(currentFont);
         static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_NoHorizontalScroll;
@@ -350,8 +357,8 @@ int main(int argc, char* argv[]) {
 
         ImGui::End();
 
+        // Render the frame
         glClear(GL_COLOR_BUFFER_BIT);
-        
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -360,12 +367,10 @@ int main(int argc, char* argv[]) {
             drawRectangleLines(0, 0, currentWidth, currentHeight, 1.0f, 1.0f, 1.0f, 0.5f);
         }
 
-        // Perform the actual resize here, after rendering
-        if (needsResize) {
-            glfwSetWindowSize(window, targetWidth, targetHeight);
-            currentWidth = targetWidth;
-            currentHeight = targetHeight;
-            needsResize = false;
+        // After the first frame, make the window visible
+        if (isFirstFrame) {
+            glfwShowWindow(window);
+            isFirstFrame = false;
         }
 
         glfwSwapBuffers(window);
