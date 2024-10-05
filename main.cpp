@@ -328,7 +328,7 @@ int main(int argc, char* argv[]) {
         ImGui::NewFrame();
 
         // Update ImGui configuration based on window focus
-        ImGui::GetIO().ConfigInputTextCursorBlink = g_WindowFocused;
+        // ImGui::GetIO().ConfigInputTextCursorBlink = g_WindowFocused;
 
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::SetNextWindowSize(ImVec2(currentWidth, currentHeight));
@@ -340,7 +340,7 @@ int main(int argc, char* argv[]) {
         ImGui::PushFont(currentFont);
         static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_NoHorizontalScroll;
         if (ImGui::InputTextMultiline("##input", inputBuffer, MAX_INPUT_LENGTH,
-            ImVec2(currentWidth - 10, currentHeight - 10), flags)) {
+            ImVec2(currentWidth - 10, currentHeight - 10), flags, NULL, NULL, !g_WindowFocused)) {
             updateWindowSize(window, inputBuffer);
         }
         ImGui::PopFont();
