@@ -25,6 +25,9 @@ extern "C" {
     void launchNewInstance();
 }
 
+#include <filesystem>
+#include <mach-o/dyld.h>
+
 const size_t MAX_INPUT_LENGTH = 4096;
 char inputBuffer[MAX_INPUT_LENGTH] = "New tape...";
 float fontSize = 14.0f;
@@ -203,9 +206,19 @@ void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int 
 // Add this function definition somewhere in the file, outside of main()
 extern "C" void launchNewInstance();
 
-int main(int argc, char* argv[]) {
-    (void)argc; // Mark as unused
-    (void)argv; // Mark as unused
+int main(int, char**)
+{
+    // Set the working directory to the Resources folder of the .app bundle
+    uint32_t bufsize = 1024;
+    char path[1024];
+    if (_NSGetExecutablePath(path, &bufsize) == 0) {
+        std::filesystem::path executablePath(path);
+        std::filesystem::path resourcesPath = executablePath.parent_path().parent_path() / "Resources";
+        std::filesystem::current_path(resourcesPath);
+    } else {
+        std::cerr << "Failed to get executable path" << std::endl;
+        return 1;
+    }
 
     initializeCocoaApp();
 
